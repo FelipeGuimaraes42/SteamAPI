@@ -6,9 +6,11 @@ steam = Steam(KEY)
 
 
 def foo():
-    print(steam.users.search_user("zelourin"))
-    print(steam.users.get_owned_games("76561198070799736"))
-    print(steam.users.get_user_recently_played_games("76561198070799736"))
+    user = steam.users.search_user("zelourin")
+    user_id = user['player']['steamid']
+    print(user_id)
+    print(steam.users.get_owned_games(user_id))
+    print(steam.users.get_user_recently_played_games(user_id))
 
 
 if __name__ == '__main__':

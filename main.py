@@ -1,6 +1,6 @@
 from steam import Steam
 from decouple import config
-
+import time
 import pandas as pd
 import numpy as np
 import warnings
@@ -13,9 +13,15 @@ steam = Steam(KEY)
 
 
 def getUserDataAndId(steamid):
-    user = steam.users.get_user_details(steamid)
-    steam_id = user['player']['steamid']
-    return user, steam_id
+    while True:
+        try:
+            user = steam.users.get_user_details(steamid)
+            steam_id = user['player']['steamid']
+            return user, steam_id
+        except Exception as e:
+            print(f"Error fetching user data for {steamid}: {str(e)}")
+            time.sleep(0.5)
+            continue
 
 
 def createDataframeFromRoot(steamid):
@@ -25,75 +31,82 @@ def createDataframeFromRoot(steamid):
     new_columns = ['friendsList', 'ownedGamesCount', 'ownedGamesList', 'recentlyPlayedGamesCount', 'recentlyPlayedGamesList']
     for col_name in new_columns:
         df[col_name] = np.nan
-
     return df, root_user, root_user_id
 
-
 def getFriendsList(df, user_id):
-    row = df.shape[0] - 1
-    try:
-        friendsListSample = steam.users.get_user_friends_list(user_id)
-        df['friendsList'][row] = friendsListSample['friends']
-        return df
-    except:
-        print('Could not get friends list for user with steamid =', df.index[row], 'due to privacy restriction.')
-        df['friendsList'][row] = np.nan
-        return df
+    while True:
+        try:
+            friendsListSample = steam.users.get_user_friends_list(user_id)
+            df['friendsList'][0] = friendsListSample['friends']
+            return df
+        except Exception as e:
+            print(f"Error fetching friends list for {user_id}: {str(e)}")
+            time.sleep(0.5)
+            continue
 
 
 def getRecentlyPlayedGamesData(df, user_id):
-    row = df.shape[0] - 1
-    recentlyPlayedGames = steam.users.get_user_recently_played_games(user_id)
-    if recentlyPlayedGames['total_count'] == 0:
-        df['recentlyPlayedGamesCount'][row] = 0
-        df['recentlyPlayedGamesList'][row] = np.nan
-        return df
-
-    df['recentlyPlayedGamesCount'][row] = recentlyPlayedGames['total_count']
-    df['recentlyPlayedGamesList'][row] = recentlyPlayedGames['games']
-    return df
+    while True:
+        try:
+            recentlyPlayedGames = steam.users.get_user_recently_played_games(user_id)
+            if recentlyPlayedGames['total_count'] == 0:
+                df['recentlyPlayedGamesCount'][0] = 0
+                df['recentlyPlayedGamesList'][0] = np.nan
+            else:
+                df['recentlyPlayedGamesCount'][0] = recentlyPlayedGames['total_count']
+                df['recentlyPlayedGamesList'][0] = recentlyPlayedGames['games']
+            return df
+        except Exception as e:
+            print(f"Error fetching recently played games data for {user_id}: {str(e)}")
+            time.sleep(0.5)
+            continue
 
 
 def getGamesData(df, user_id):
-    try:
-        row = df.shape[0] - 1
-        owned_games = steam.users.get_owned_games(user_id)
-        if len(owned_games) == 0:
-            df['ownedGamesCount'][row] = 0
-            df['ownedGamesList'][row] = np.nan
+    while True:
+        try:
+            owned_games = steam.users.get_owned_games(user_id)
+            if len(owned_games) == 0:
+                df['ownedGamesCount'][0] = 0
+                df['ownedGamesList'][0] = np.nan
+            else:
+                df['ownedGamesCount'][0] = len(owned_games['games'])
+                df['ownedGamesList'][0] = owned_games['games']
+                getRecentlyPlayedGamesData(df, user_id)
             return df
-
-        df['ownedGamesCount'][row] = len(owned_games['games'])
-        df['ownedGamesList'][row] = owned_games['games']
-        df = getRecentlyPlayedGamesData(df)
-        return df
-    except:
-        return df
+        except Exception as e:
+            print(f"Error fetching games data for {user_id}: {str(e)}")
+            time.sleep(0.5)
+            continue
 
 
 def getFriendsDataRecursive(df, user_id, level, max_level):
     if level > max_level:
         return df
 
-    row = df.shape[0] - 1
-    friendsListSample = steam.users.get_user_friends_list(user_id)
-    friends = friendsListSample['friends']
+    while True:
+        try:
+            friendsListSample = steam.users.get_user_friends_list(user_id)
+            friends = friendsListSample['friends']
 
-    for friend in friends:
-        friend_user_id = friend['steamid']
-        if friend_user_id not in df.index.values:
-            user, _ = getUserDataAndId(friend_user_id)
-            new_row = pd.DataFrame(data=user).T
-            new_row.set_index('steamid', inplace=True)
-            df = pd.concat([df, new_row])
+            for friend in friends:
+                friend_user_id = friend['steamid']
+                if friend_user_id not in df.index.values:
+                    user, _ = getUserDataAndId(friend_user_id)
+                    new_row = pd.DataFrame(data=user).T
+                    new_row.set_index('steamid', inplace=True)
+                    df = pd.concat([df, new_row])
 
-            getFriendsList(df, friend_user_id)
-            getGamesData(df, friend_user_id)
+                    getFriendsList(df, friend_user_id)
+                    getGamesData(df, friend_user_id)
 
-            # Recursively fetch friends data for the next level
-            df = getFriendsDataRecursive(df, friend_user_id, level + 1, max_level)
+                    df = getFriendsDataRecursive(df, friend_user_id, level + 1, max_level)
 
-    return df
+            return df
+        except Exception as e:
+            print(f"Error fetching friends data for {user_id}: {str(e)}")
+            time.sleep(0.5)
+            continue
 
 
 root_df, root_user, root_user_id = createDataframeFromRoot('76561198070799736')

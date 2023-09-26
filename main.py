@@ -29,17 +29,12 @@ def createDataframeFromRoot(steamid):
 
   return df, root_user, root_user_id
 
-# Get one of the users in the top of the steam friends ladder in https://steamladder.com/ladder/friends/
-root_df, root_user, root_user_id = createDataframeFromRoot('76561198070799736')
-
 """## Get data from API:"""
 
 # The api does not return all friends for a given user. It only returns a sample of up to 100 friends.
-
 # Take user: https://steamcommunity.com/id/sazakikun/ for instance. They have over 100 friends (121 currently) but the returned object only has 100 entries.
-sasakikunSteamId = '76561198119777155'
-friendsListSample = steam.users.get_user_friends_list(sasakikunSteamId)
-print(len(friendsListSample['friends']))
+
+privateIdsList = []
 
 def getFriendsList(df, user_id):
   row = df.shape[0] - 1
@@ -47,12 +42,10 @@ def getFriendsList(df, user_id):
     friendsListSample = steam.users.get_user_friends_list(user_id)
     df['friendsList'][row] = friendsListSample['friends']
     return df
-  except:
-    print('Could not get friends list for user with steamid =', df.index[row], 'due to privacy restriction.')
+  except Exception as e:
+    privateIdsList.append(df.index[row])
     df['friendsList'][row] = np.nan
     return df
-
-root_df = getFriendsList(root_df, root_user_id)
 
 def getRecentlyPlayedGamesData(df, user_id):
   row = df.shape[0] - 1
@@ -80,24 +73,49 @@ def getGamesData(df, user_id):
     df = getRecentlyPlayedGamesData(df)
     return df
 
-  except:
+  except Exception as e:
     return df
 
-root_df = getGamesData(root_df, root_user_id)
-
-# Adding Friends of root
-root_friends_list = root_df.friendsList[0]
-df = root_df
-
-for i in range(len(root_friends_list)):
-  user, user_id = getUserDataAndId(root_friends_list[i]['steamid'])
+def addNewRow(df, user_id):
   if user_id not in df.index.values:
     new_row = pd.DataFrame(data=user).T
     new_row.set_index('steamid', inplace=True)
     df = pd.concat([df, new_row])
 
     getFriendsList(df, user_id)
-    getGamesData(df, user_id)
+    # getGamesData(df, user_id)
+
+    return df
+
+# Get one of the users in the top of the steam friends ladder in https://steamladder.com/ladder/friends/
+root_df, root_user, root_user_id = createDataframeFromRoot('76561198070799736')
+root_df = getFriendsList(root_df, root_user_id)
+root_df = getGamesData(root_df, root_user_id)
+
+root_friends_list = root_df.friendsList[0]
+df = root_df
+
+# Adding Friends of root -> level 1
+for i in range(len(root_friends_list)):
+  user, user_id = getUserDataAndId(root_friends_list[i]['steamid'])
+  df = addNewRow(df, user_id)
+
+level_1 = df
+
+# Adding Friends of Friends of root -> level 2
+
+start = 1
+end = len(df) - 1
+
+for index in range(start, end):
+  friends = df.iloc[index].friendsList
+
+  if str(type(friends)) == "<class 'list'>":
+    for i in range(len(friends)):
+      user, user_id = getUserDataAndId(friends[i]['steamid'])
+
+      if user_id not in privateIdsList:
+        df = addNewRow(df, user_id)
 
 print(df.head())
 df.to_csv('data.csv')

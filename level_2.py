@@ -249,7 +249,7 @@ def addNewRow(df, user_id):
 
 """## Start data collection from partial dataframe:"""
 
-url='https://drive.google.com/file/d/1-a_mkowFcMoPWk5itYQb2jNnx-0oiO9n/view?usp=drive_link'
+url='https://drive.google.com/file/d/1AcceS7P8htyW69QUZmm9Z1859Bn8cnFA/view?usp=drive_link'
 url='https://drive.google.com/uc?id=' + url.split('/')[-2]
 df = pd.read_csv(url)
 df.set_index('steamid', inplace=True)
@@ -261,7 +261,8 @@ columns_to_convert = ['friendsList', 'ownedGamesList', 'recentlyPlayedGamesList'
 for column in columns_to_convert:
     df[column] = df[column].apply(lambda x: ast.literal_eval(x) if pd.notna(x) else x)
 
-str(type(df.iloc[61].friendsList)) == "<class 'list'>"
+# Test to see if str to list of objects operation is ok.
+str(type(df.iloc[0].friendsList)) == "<class 'list'>"
 
 import time
 
@@ -270,9 +271,9 @@ num_waits = 0
 
 # Adding Friends of Friends of root -> level 2
 
-# Level 1 - friends of root - were users between rows 1 and 59.
-# Level 2 - starts from row 60 and beyond
-start = 60
+# Level 1 - friends of root
+# Level 2 - excludes root (index = 0) and targets friends of users between index 1 and the end of level_1 dataframe.
+start = 1
 end = len(df) - 1
 
 for index in range(start, end):
@@ -294,6 +295,9 @@ for index in range(start, end):
         num_operations = 0
         time.sleep(150)
         print('200 + operations made. Waiting for 2.5 minutes. This happened', num_waits, 'times.')
+
+# Remember to update the privateIdsList in https://docs.google.com/document/d/1JEWrZSZoGuhNglK-o_AmGA3Yto_dRAxQJovNPWL-Rqo/edit?usp=drive_link
+print("Remember to update the privateIdsList:\n",privateIdsList)
 
 from google.colab import files
 level_2 = df

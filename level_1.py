@@ -204,7 +204,9 @@ def getFriendsList(df, user_id):
     df['friendsList'][row] = friendsListSample['friends']
     return df
   except Exception as e:
-    privateIdsList.append(df.index[row])
+    if (df.index[row] not in privateIdsList):
+      privateIdsList.append(df.index[row])
+
     df['friendsList'][row] = np.nan
     return df
 
@@ -249,9 +251,10 @@ def addNewRow(df, user_id):
 
 """## Start data collection from partial dataframe:"""
 
-url='https://drive.google.com/file/d/1AcceS7P8htyW69QUZmm9Z1859Bn8cnFA/view?usp=drive_link'
+url='https://drive.google.com/file/d/1xmQqQ-Epoh6JtBX-qkTj7ClG917ShZpC/view?usp=drive_link'
 url='https://drive.google.com/uc?id=' + url.split('/')[-2]
 df = pd.read_csv(url)
+df.set_index('steamid', inplace=True)
 df.head()
 
 import ast
@@ -260,7 +263,8 @@ columns_to_convert = ['friendsList', 'ownedGamesList', 'recentlyPlayedGamesList'
 for column in columns_to_convert:
     df[column] = df[column].apply(lambda x: ast.literal_eval(x) if pd.notna(x) else x)
 
-str(type(df.iloc[61].friendsList)) == "<class 'list'>"
+# Test to see if str to list of objects operation is ok.
+str(type(df.iloc[0].friendsList)) == "<class 'list'>"
 
 import time
 
@@ -268,32 +272,16 @@ num_operations = 0
 num_waits = 0
 
 # Adding Friends of root -> level 1
+root_friends_list = df.iloc[0].friendsList
 
-# Level 1 - friends of root - were users between rows 1 and 59.
-start = 1
-end = len(df) - 1
+for i in range(len(root_friends_list)):
+  user, user_id = getUserDataAndId(root_friends_list[i]['steamid'])
+  df = addNewRow(df, user_id)
 
-for index in range(start, end):
-  friends = df.iloc[index].friendsList
-
-  if str(type(friends)) == "<class 'list'>":
-    for i in range(len(friends)):
-      print('Adding friends of row', index, 'to database...')
-      user, user_id = getUserDataAndId(friends[i]['steamid'])
-      num_operations += 1
-
-      if user_id not in privateIdsList:
-        df = addNewRow(df, user_id)
-        num_operations += 3
-
-      if num_operations >= 200:
-        num_waits += 1
-        num_operations = 0
-        time.sleep(150)
-        print('200 + operations made. Waiting for 2.5 minutes. This happened', num_waits, 'times.')
+# Remember to update the privateIdsList in https://docs.google.com/document/d/1JEWrZSZoGuhNglK-o_AmGA3Yto_dRAxQJovNPWL-Rqo/edit?usp=drive_link
+print("Remember to update the privateIdsList:\n",privateIdsList)
 
 from google.colab import files
 level_1 = df
 level_1.to_csv('level_1.csv', encoding = 'utf-8-sig')
 files.download('level_1.csv')
-

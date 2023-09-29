@@ -1,0 +1,105 @@
+**CONTEXT**
+I'm collecting Steam users' information for a college work. But, as Steam API blocks me after a high number of requests, I realized that I'll not be able to collect all the information I need in the time I have.
+
+**REQUEST**
+I need you to create a Selenium script for me that will save the information I need. For that, you will:
+ - Start the collection on the following link: https://steamcommunity.com/groups/jogosbra/members/?p=1
+ - Each page has 51 users and I need you to collect them all. The users are inside a div named 'memberList'.
+ - You will iterate over all members pages.
+ - After clicking on a member, you will get its 'Friends', 'Games'.
+      - For Friends, I'll need only the link to it
+      - For Games, I'll need the link to it, the name and the amount of played hours.
+Do that for all members of the group.
+
+**HTML examples**
+*Members*
+<div id="memberList">
+<div class="member_block " data-miniprofile="113089434">
+											<div class="rank_icon" title="Dono do grupo">
+							<img class="officerIcon" src="https://community.cloudflare.steamstatic.com/public/images/skin_1/rankIconOfficer.gif" width="21" height="21" border="0">
+						</div>
+															<div class="playerAvatar online">
+						<a href="https://steamcommunity.com/id/fabuless">
+							<img src="https://avatars.cloudflare.steamstatic.com/1e367e2d8c87cd1dc31323c18bb585dd7e76f23d.jpg">
+						</a>
+					</div>
+					<div class="member_block_content  online">
+						<div><a class="linkFriend" href="https://steamcommunity.com/id/fabuless">DKA</a></div>
+						<div class="friendSmallText">Disponível</div>
+					</div>
+				</div>
+// A lot of other users
+</div>
+
+*Group member*
+<div data-panel="{&quot;maintainX&quot;:true,&quot;bFocusRingRoot&quot;:true,&quot;flow-children&quot;:&quot;row&quot;}"
+     class="profile_item_links">
+    <div data-panel="{&quot;focusable&quot;:true,&quot;clickOnActivate&quot;:true}" class="profile_count_link ellipsis">
+        <a href="https://steamcommunity.com/id/karlosjp/games/?tab=all">
+            <span class="count_link_label">Jogos</span>&nbsp;
+            <span class="profile_count_link_total">
+																	2,373															</span>
+        </a>
+    </div>
+    <div class="profile_friend_links profile_count_link_preview_ctn responsive_groupfriends_element"
+         data-panel="{&quot;focusable&quot;:true,&quot;clickOnActivate&quot;:true}">
+        <div data-panel="{&quot;focusable&quot;:true,&quot;clickOnActivate&quot;:true}"
+             class="profile_count_link ellipsis">
+            <a href="https://steamcommunity.com/id/karlosjp/friends/">
+                <span class="count_link_label">Amigos</span>&nbsp;
+                <span class="profile_count_link_total">
+																	123															</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+*Games*
+<div class="gameslistapp_Gameslistapp_2nl8H Panel Focusable">
+    <div class="gameslistitems_List_3tY9v Panel Focusable" style="height: 1.1043e+06px;">
+        <div class="gameslistitems_GamesListItemContainer_29H3o" style="top: 0px;">
+            <div class="gameslistitems_GamesListItem_2-pQF Panel Focusable" tabindex="0"><a
+                    href="https://store.steampowered.com/app/105600"
+                    class="gameslistitems_GameItemPortrait_1bAC6 Focusable" tabindex="0">
+                <div class="gameslistitems_PortraitContainer_1CHM8">
+                    <picture>
+                        <source media="(max-width: 30rem)"
+                                srcset="https://cdn.cloudflare.steamstatic.com/steam/apps/105600/library_600x900.jpg">
+                        <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/105600/header.jpg" alt="Terraria"
+                             loading="lazy"></picture>
+                    <div title="Alcançou todas as conquistas possíveis.">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" fill="none"
+                             class="gameslistitems_PerfectRibbon_1uKlf">
+                            <path stroke="url(#svgid_8)" fill="url(#svgid_9)"
+                                  d="M10.1777 10.0258L10.3929 9.80693V9.49999V5.52777H14.2857H14.6001L14.8205 5.30358L18 2.06976L21.1795 5.30358L21.3999 5.52777H21.7143H25.6071V9.50001V9.80696L25.8223 10.0258L28.5553 12.8055L25.8223 15.5853L25.6071 15.8041V16.1111V20.0833H21.7143H21.3999L21.1795 20.3075L18 23.5413L14.8205 20.3075L14.6001 20.0833H14.2857H10.3929V16.1111V15.8042L10.1777 15.5853L7.44464 12.8055L10.1777 10.0258ZM14.7399 28.0317L11.56 33.4221L9.85164 29.9469L9.6456 29.5278H9.17857H6.29474L8.68445 25.3611H12.1142L14.7399 28.0317ZM26.8214 29.5278H26.3544L26.1484 29.9469L24.44 33.4221L21.2601 28.0317L23.8858 25.3611H27.3155L29.7053 29.5278H26.8214Z"
+                                  stroke-width="1.5"></path>
+                            <circle stroke="#FFAB2C" fill="#FFC82C" cx="18" cy="13" r="5.5"></circle>
+                            <defs>
+                                <linearGradient id="svgid_9" x1="7.08" y1="3.72" x2="33.6694" y2="25.0697"
+                                                gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#0056D6"></stop>
+                                    <stop offset="1" stop-color="#1A9FFF"></stop>
+                                </linearGradient>
+                                <linearGradient id="svgid_8" x1="7.08" y1="3.72" x2="33.6694" y2="25.0697"
+                                                gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#0056D6"></stop>
+                                    <stop offset="1" stop-color="#1A9FFF"></stop>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+            </a><span class="gameslistitems_GameNameContainer_w6q9p"><a href="https://store.steampowered.com/app/105600"
+                                                                        class="gameslistitems_GameName_22awl">Terraria</a></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+*Friends*
+<div class="friends_container">
+    <a class="selectable_overlay" data-container="#fr_215630355" href="https://steamcommunity.com/id/Luacs"></a>
+    <a class="selectable_overlay" href="https://steamcommunity.com/id/userId"></a>
+    // A lot of other friends
+    <a class="selectable_overlay" href="https://steamcommunity.com/id/userId"></a>
+</div>

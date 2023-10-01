@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-# import time
+import time
 import csv
 
 import chromedriver_autoinstaller
@@ -13,7 +13,7 @@ chrome_options.add_argument("--window-size=1920x1080")
 driver = webdriver.Chrome(options=chrome_options)
 
 # Número da página atual
-page_number = 2
+page_number = 1
 
 # Abrir a página de membros do grupo Steam
 url = "https://steamcommunity.com/groups/jogosbra/members/?p=" + str(page_number)
@@ -21,24 +21,21 @@ driver.get(url)
 
 
 # Função para raspar e coletar informações do membro
-def scrape_member_info(scraped_member_block):
+def scrape_member_info(member_parameter):
     scraped_member_info = {}
 
-    # Extrair link do perfil e nome de usuário
-    profile_link = scraped_member_block.find_element(By.CSS_SELECTOR, 'a.linkFriend').get_attribute('href')
+    username = member_parameter[0]
+    profile_link = member_parameter[1]
     user_id = profile_link.split('/')[-1]
-    username = scraped_member_block.find_element(By.CSS_SELECTOR, 'a.linkFriend').text
 
-    # Clicar no perfil do membro para obter informações adicionais
-    scraped_member_block.find_element(By.CSS_SELECTOR, 'a.linkFriend').click()
-    # time.sleep(2)  # Esperar a página do perfil carregar
-
-    # Create a dictionary to store friend names and their profile URLs
     friend_data = {}
     num_friends = 0
     try:
         user_friends_url = profile_link + '/friends'
+
         driver.get(user_friends_url)
+        time.sleep(2)  # Esperar a página do perfil carregar
+
         friend_list_div = driver.find_element(By.ID, "friends_list")
 
         # Find all the friend elements within the friend list
@@ -46,7 +43,6 @@ def scrape_member_info(scraped_member_block):
 
         # Get the count of friends
         num_friends = len(friend_elements)
-        print(num_friends)
 
         # Iterate through the friend elements to extract names and profile URLs
         for friend_element in friend_elements:
@@ -56,22 +52,6 @@ def scrape_member_info(scraped_member_block):
     except Exception as exc:
         print('An exception occurred when retrieving friend data.', exc)
 
-    # try:
-    #     # Obter o número de amigos
-    #     friends_link = driver.find_element(By.PARTIAL_LINK_TEXT, "Amigos")
-    #     num_friends = int(friends_link.find_element(By.CLASS_NAME, 'profile_count_link_total').text.replace(',', ''))
-    # except Exception as e:
-    #     num_friends = 0
-    #
-    # try:
-    #     # Obter o número de jogos e o link para os jogos
-    #     games_link = driver.find_element(By.PARTIAL_LINK_TEXT, "Jogos")
-    #     num_games = int(games_link.find_element(By.CLASS_NAME, 'profile_count_link_total').text.replace(',', ''))
-    #     games_url = games_link.get_attribute('href')
-    # except Exception as e:
-    #     num_games = 0
-    #     games_url = ""
-
     # Armazenar informações do membro em um dicionário
     scraped_member_info['id'] = user_id
     scraped_member_info['username'] = username
@@ -79,7 +59,7 @@ def scrape_member_info(scraped_member_block):
     scraped_member_info['num_friends'] = num_friends
     scraped_member_info['friends'] = friend_data
 
-    print(scraped_member_info)
+    # print(scraped_member_info)
     return scraped_member_info
 
 
@@ -98,11 +78,24 @@ except FileNotFoundError:
 # Loop através das páginas de membros
 while True:
     try:
-        member_blocks = driver.find_elements(By.CSS_SELECTOR, 'div#memberList div.member_block')
+        # Find the memberList div
+        member_list_div = driver.find_elements(By.CSS_SELECTOR, 'div#memberList')
 
-        # Coletando informações para cada membro na página
+        # Find all the divs with class 'member_block' inside memberList
+        member_blocks = driver.find_elements(By.CSS_SELECTOR, 'div.member_block')
+        member_block_last = driver.find_elements(By.CSS_SELECTOR, 'div.member_block last')
+
+        members = []
         for member_block in member_blocks:
-            member_info = scrape_member_info(member_block)
+            member = member_block.find_elements(By.CSS_SELECTOR, 'a.linkFriend')[0]
+            members.append((member.text, member.get_attribute('href')))
+
+        for member_block in member_block_last:
+            member = member_block.find_elements(By.CSS_SELECTOR, 'a.linkFriend')[0]
+            members.append((member.text, member.get_attribute('href')))
+
+        for member in members:
+            member_info = scrape_member_info(member)
             all_member_info.append(member_info)
 
         # Salvando informações em um arquivo CSV após cada iteração

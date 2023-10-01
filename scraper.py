@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import time
 import csv
+import os
 
 import chromedriver_autoinstaller
 
@@ -12,12 +13,21 @@ chrome_options = Options()
 chrome_options.add_argument("--window-size=1920x1080")
 driver = webdriver.Chrome(options=chrome_options)
 
-# Número da página atual
-page_number = 1
 
-# Abrir a página de membros do grupo Steam
-url = "https://steamcommunity.com/groups/jogosbra/members/?p=" + str(page_number)
-driver.get(url)
+def create_csv_file():
+    if not os.path.exists('steam_members.csv'):
+        with open('steam_members.csv', 'w', newline='') as csv_file:
+            fieldnames = ['Page', 'Username', 'Profile Link', 'Number of Friends', 'Friends']
+            csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            csv_writer.writeheader()
+
+
+def create_csv_file_without_usernames():
+    if not os.path.exists('steam_members.csv'):
+        with open('steam_members.csv', 'w', newline='') as csv_file:
+            fieldnames = ['Page', 'Id', 'Number of Friends', 'Friends']
+            csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            csv_writer.writeheader()
 
 
 # Função para raspar e coletar informações do membro
@@ -28,7 +38,8 @@ def scrape_member_info(member_parameter):
     profile_link = member_parameter[1]
     user_id = profile_link.split('/')[-1]
 
-    friend_data = {}
+    # friend_data = {}
+    friend_data = []
     num_friends = 0
     try:
         user_friends_url = profile_link + '/friends'
@@ -46,9 +57,11 @@ def scrape_member_info(member_parameter):
 
         # Iterate through the friend elements to extract names and profile URLs
         for friend_element in friend_elements:
-            friend_name = friend_element.find_element(By.CLASS_NAME, "friend_block_content").text.split('\n')[0]
             friend_url = friend_element.find_element(By.CLASS_NAME, "selectable_overlay").get_attribute("href")
-            friend_data[friend_name] = friend_url
+            friend_data.append(friend_url.split('/')[-1])
+            # friend_name = friend_element.find_element(By.CLASS_NAME, "friend_block_content").text.split('\n')[0]
+            # friend_data[friend_name] = friend_url
+            # friend_data.append(friend_url)
     except Exception as exc:
         print('An exception occurred when retrieving friend data.', exc)
 
@@ -63,17 +76,49 @@ def scrape_member_info(member_parameter):
     return scraped_member_info
 
 
+# Tentar continuar de onde parou
+# try:
+#     with open('steam_members.csv', 'r') as csv_file:
+#         csv_reader = csv.DictReader(csv_file)
+#         for row in csv_reader:
+#             page_number = int(row['Page']) + 1
+# except FileNotFoundError:
+#     page_number = 1
+
+
+def save_member_info_csv(member_info_parameter):
+    with open('steam_members.csv', 'a', newline='') as csv_file:
+        fieldnames = ['Page', 'Username', 'Profile Link', 'Number of Friends', 'Friends']
+        csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        csv_writer.writerow({'Page': page_number, 'Username': member_info_parameter['username'],
+                             'Profile Link': member_info_parameter['profile_link'],
+                             'Number of Friends': member_info_parameter['num_friends'],
+                             'Friends': member_info_parameter['friends']})
+
+
+def save_member_info_csv_without_usernames(member_info_parameter):
+    with open('steam_members.csv', 'a', newline='') as csv_file:
+        fieldnames = ['Page', 'Id', 'Number of Friends', 'Friends']
+        csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        csv_writer.writerow({'Page': page_number,
+                             'Id': member_info_parameter['id'],
+                             'Number of Friends': member_info_parameter['num_friends'],
+                             # 'Friends': str(member_info_parameter['friends']).replace("[", "").replace("]", "").replace(
+                             #     "'", "")})
+                             'Friends': member_info_parameter['friends']})
+
+
+# Número da página atual
+page_number = 1
+
+# Abrir a página de membros do grupo Steam
+url = "https://steamcommunity.com/groups/jogosbra/members/?p=" + str(page_number)
+driver.get(url)
+
 # Inicializar lista para armazenar informações de todos os membros
 all_member_info = []
 
-# Tentar continuar de onde parou
-try:
-    with open('steam_members.csv', 'r') as csv_file:
-        csv_reader = csv.DictReader(csv_file)
-        for row in csv_reader:
-            page_number = int(row['Page']) + 1
-except FileNotFoundError:
-    page_number = 1
+create_csv_file_without_usernames()
 
 # Loop através das páginas de membros
 while True:
@@ -96,19 +141,9 @@ while True:
 
         for member in members:
             member_info = scrape_member_info(member)
+            # Salvando informações em um arquivo CSV após cada iteração
+            save_member_info_csv_without_usernames(member_info)
             all_member_info.append(member_info)
-
-        # Salvando informações em um arquivo CSV após cada iteração
-        with open('steam_members.csv', 'w', newline='') as csv_file:
-            fieldnames = ['Page', 'Username', 'Profile Link', 'Number of Friends', 'Number of Games', 'Games Link']
-            csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-            csv_writer.writeheader()
-            for idx, member_info in enumerate(all_member_info):
-                csv_writer.writerow({'Page': page_number, 'Username': member_info['username'],
-                                     'Profile Link': member_info['profile_link'],
-                                     'Number of Friends': member_info['num_friends'],
-                                     'Number of Games': member_info['num_games'],
-                                     'Games Link': member_info['games_link']})
 
         # Navegar para a próxima página
         page_number += 1
@@ -122,8 +157,8 @@ while True:
     except Exception as e:
         print(f"Erro na página {page_number}: {str(e)}")
         # Se ocorrer um erro, registre o número da página e faça o download do CSV gerado
-        with open('last_page_error.txt', 'w') as error_file:
-            error_file.write(str(page_number))
+        # with open('last_page_error.txt', 'w') as error_file:
+        #     error_file.write(str(page_number))
         break
 
 # Fechar o navegador

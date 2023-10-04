@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from decouple import config
+
 import time
 import csv
 import os
@@ -12,6 +14,37 @@ chrome_options = Options()
 # chrome_options.add_argument("--headless")
 chrome_options.add_argument("--window-size=1920x1080")
 driver = webdriver.Chrome(options=chrome_options)
+
+STEAM_USERNAME = config('STEAM_USERNAME')
+STEAM_PASSWORD = config('STEAM_PASSWORD')
+
+
+def login_to_steam():
+    # Abra a página de login do Steam
+    driver.get('https://store.steampowered.com/login/')
+    time.sleep(5)
+
+    try:
+        # Encontre os campos de entrada de nome de usuário e senha
+        # username_field = driver.find_element_by_xpath('//input[@type="text"]')
+        # password_field = driver.find_element_by_xpath('//input[@type="password"]')
+        username_field = driver.find_element_by_css_selector('input[type="text"]')
+        password_field = driver.find_element_by_css_selector('input[type="password"]')
+
+        # Preencha os campos de entrada
+        username_field.send_keys(STEAM_USERNAME)
+        password_field.send_keys(STEAM_PASSWORD)
+
+        # Envie o formulário (clique no botão Iniciar Sessão)
+        # login_button = driver.find_element_by_xpath('//button[@type="submit"]')
+        login_button = driver.find_element_by_css_selector('button[type="submit"]')
+        login_button.click()
+
+        # Espere alguns segundos (você pode ajustar isso conforme necessário)
+        driver.implicitly_wait(5)
+
+    except Exception as exc:
+        print(f"Ocorreu um erro ao efetuar o login: {str(exc)}")
 
 
 def create_csv_file():
@@ -30,14 +63,7 @@ def create_csv_file_without_usernames():
             csv_writer.writeheader()
 
 
-# Função para raspar e coletar informações do membro
-def scrape_member_info(member_parameter):
-    scraped_member_info = {}
-
-    username = member_parameter[0]
-    profile_link = member_parameter[1]
-    user_id = profile_link.split('/')[-1]
-
+def scrap_friends_data(profile_link):
     # friend_data = {}
     friend_data = []
     num_friends = 0
@@ -64,6 +90,21 @@ def scrape_member_info(member_parameter):
             # friend_data.append(friend_url)
     except Exception as exc:
         print('An exception occurred when retrieving friend data.', exc)
+    return friend_data, num_friends
+
+
+# Função para raspar e coletar informações do membro
+def scrape_member_info(member_parameter):
+    scraped_member_info = {}
+
+    username = member_parameter[0]
+    profile_link = member_parameter[1]
+    user_id = profile_link.split('/')[-1]
+
+    friend_data, num_friends = scrap_friends_data(profile_link)
+
+    # TODO create games scraping function
+    # games_data, num_games = scrap_games_data(profile_link)
 
     # Armazenar informações do membro em um dicionário
     scraped_member_info['id'] = user_id
@@ -107,6 +148,9 @@ def save_member_info_csv_without_usernames(member_info_parameter):
                              #     "'", "")})
                              'Friends': member_info_parameter['friends']})
 
+
+# Chame a função para fazer login no Steam
+login_to_steam()
 
 # Número da página atual
 page_number = 1
@@ -163,12 +207,3 @@ while True:
 
 # Fechar o navegador
 driver.quit()
-
-# Imprimir ou salvar as informações coletadas
-# for member_info in all_member_info:
-#     print(f"Username: {member_info['username']}")
-#     print(f"Profile Link: {member_info['profile_link']}")
-#     print(f"Number of Friends: {member_info['num_friends']}")
-#     print(f"Number of Games: {member_info['num_games']}")
-#     print(f"Games Link: {member_info['games_link']}")
-#     print("\n")

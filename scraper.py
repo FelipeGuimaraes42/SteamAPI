@@ -111,13 +111,13 @@ def scrap_games_data(profile_link):
 
         # Iterate through the friend elements to extract names and profile URLs
         for game_element in game_elements:
-            game_name = game_element.find_element(By.CLASS_NAME, "gameslistitems_GameNameContainer_w6q9p").text
-            game_url = \
-                game_element.find_element(By.CLASS_NAME, "gameslistitems_GameNameContainer_w6q9p").get_attribute(
-                    "href")
-            game_id = game_url.split('/')[-1]
+            game_name_container = game_element.find_element(By.CLASS_NAME, "gameslistitems_GameNameContainer_w6q9p")
+            game_name = game_name_container.text
+            # game_url = game_name_container.get_attribute("href")
+            # game_id = game_url.split('/')[-1]
             hours_played = game_element.find_element(By.CLASS_NAME, "gameslistitems_Hours_26nl3").text
-            game_data.append((game_id, game_name, hours_played))
+            # game_data.append((game_id, game_name, hours_played))
+            game_data.append((game_name, hours_played))
     except Exception as exc:
         print('An exception occurred when retrieving friend data.', exc)
     return game_data, num_games
@@ -183,7 +183,7 @@ def save_member_info_csv_without_usernames(member_info_parameter):
 login_to_steam()
 
 # Número da página atual
-page_number = 1
+page_number = 2
 
 # # Após fazer login, obtenha os cookies
 # cookies = driver.get_cookies()

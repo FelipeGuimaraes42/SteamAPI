@@ -18,30 +18,29 @@ driver = webdriver.Chrome(options=chrome_options)
 STEAM_USERNAME = config('STEAM_USERNAME')
 STEAM_PASSWORD = config('STEAM_PASSWORD')
 
+game_link_prefix = 'https://store.steampowered.com/app/'
+
 
 def login_to_steam():
     # Abra a página de login do Steam
     driver.get('https://store.steampowered.com/login/')
-    time.sleep(5)
+    time.sleep(10)
 
     try:
         # Encontre os campos de entrada de nome de usuário e senha
-        # username_field = driver.find_element_by_xpath('//input[@type="text"]')
-        # password_field = driver.find_element_by_xpath('//input[@type="password"]')
-        username_field = driver.find_element_by_css_selector('input[type="text"]')
-        password_field = driver.find_element_by_css_selector('input[type="password"]')
+        username_field = driver.find_element(By.XPATH, '//input[@type="text"]')
+        password_field = driver.find_element(By.XPATH, '//input[@type="password"]')
 
         # Preencha os campos de entrada
         username_field.send_keys(STEAM_USERNAME)
         password_field.send_keys(STEAM_PASSWORD)
 
         # Envie o formulário (clique no botão Iniciar Sessão)
-        # login_button = driver.find_element_by_xpath('//button[@type="submit"]')
-        login_button = driver.find_element_by_css_selector('button[type="submit"]')
+        login_button = driver.find_element(By.XPATH, '//button[@type="submit"]')
         login_button.click()
 
         # Espere alguns segundos (você pode ajustar isso conforme necessário)
-        driver.implicitly_wait(5)
+        time.sleep(10)
 
     except Exception as exc:
         print(f"Ocorreu um erro ao efetuar o login: {str(exc)}")
@@ -93,6 +92,37 @@ def scrap_friends_data(profile_link):
     return friend_data, num_friends
 
 
+def scrap_games_data(profile_link):
+    game_data = []
+    num_games = 0
+    try:
+        user_games_url = profile_link + '/games/?tab=all'
+
+        driver.get(user_games_url)
+        time.sleep(10)  # Esperar a página dos jogos carregar
+
+        games_list_div = driver.find_element(By.CLASS_NAME, "gameslistitems_List_3tY9v")
+
+        # Find all the friend elements within the friend list
+        game_elements = games_list_div.find_elements(By.CLASS_NAME, "gameslistitems_GamesListItemContainer_29H3o")
+
+        # Get the count of friends
+        num_games = len(game_elements)
+
+        # Iterate through the friend elements to extract names and profile URLs
+        for game_element in game_elements:
+            game_name = game_element.find_element(By.CLASS_NAME, "gameslistitems_GameNameContainer_w6q9p").text
+            game_url = \
+                game_element.find_element(By.CLASS_NAME, "gameslistitems_GameNameContainer_w6q9p").get_attribute(
+                    "href")
+            game_id = game_url.split('/')[-1]
+            hours_played = game_element.find_element(By.CLASS_NAME, "gameslistitems_Hours_26nl3").text
+            game_data.append((game_id, game_name, hours_played))
+    except Exception as exc:
+        print('An exception occurred when retrieving friend data.', exc)
+    return game_data, num_games
+
+
 # Função para raspar e coletar informações do membro
 def scrape_member_info(member_parameter):
     scraped_member_info = {}
@@ -104,7 +134,7 @@ def scrape_member_info(member_parameter):
     friend_data, num_friends = scrap_friends_data(profile_link)
 
     # TODO create games scraping function
-    # games_data, num_games = scrap_games_data(profile_link)
+    games_data, num_games = scrap_games_data(profile_link)
 
     # Armazenar informações do membro em um dicionário
     scraped_member_info['id'] = user_id
@@ -155,9 +185,16 @@ login_to_steam()
 # Número da página atual
 page_number = 1
 
+# # Após fazer login, obtenha os cookies
+# cookies = driver.get_cookies()
+
 # Abrir a página de membros do grupo Steam
 url = "https://steamcommunity.com/groups/jogosbra/members/?p=" + str(page_number)
 driver.get(url)
+
+# # Defina os cookies manualmente
+# for cookie in cookies:
+#     driver.add_cookie(cookie)
 
 # Inicializar lista para armazenar informações de todos os membros
 all_member_info = []

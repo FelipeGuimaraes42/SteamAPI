@@ -49,7 +49,8 @@ def login_to_steam():
 def create_csv_file():
     if not os.path.exists('steam_members.csv'):
         with open('steam_members.csv', 'w', newline='') as csv_file:
-            fieldnames = ['Page', 'Username', 'Profile Link', 'Number of Friends', 'Friends']
+            fieldnames = ['Page', 'Username', 'Profile Link', 'Number of Friends', 'Friends', 'Number of Games',
+                          'Games']
             csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
             csv_writer.writeheader()
 
@@ -57,7 +58,7 @@ def create_csv_file():
 def create_csv_file_without_usernames():
     if not os.path.exists('steam_members.csv'):
         with open('steam_members.csv', 'w', newline='') as csv_file:
-            fieldnames = ['Page', 'Id', 'Number of Friends', 'Friends']
+            fieldnames = ['Page', 'Id', 'Number of Friends', 'Friends', 'Friends', 'Number of Games', 'Games']
             csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
             csv_writer.writeheader()
 
@@ -115,8 +116,9 @@ def scrap_games_data(profile_link):
                 "href")
             game_id = game_url.split('/')[-1]
             game_name = game_element.find_element(By.CLASS_NAME, "gameslistitems_GameNameContainer_w6q9p").text
-            hours_played = game_element.find_element(By.CLASS_NAME, "gameslistitems_Hours_26nl3").text
-            game_data.append((game_id, game_name, hours_played))
+            hours_played_element = game_element.find_element(By.CLASS_NAME, "gameslistitems_Hours_26nl3").text
+            playtime = hours_played_element.split('\n')[-1].split(' ')[0]
+            game_data.append((game_id, game_name, playtime))
     except Exception as exc:
         print('An exception occurred when retrieving friend data.', exc)
     return game_data, num_games
@@ -131,8 +133,6 @@ def scrape_member_info(member_parameter):
     user_id = profile_link.split('/')[-1]
 
     friend_data, num_friends = scrap_friends_data(profile_link)
-
-    # TODO create games scraping function
     games_data, num_games = scrap_games_data(profile_link)
 
     # Armazenar informações do membro em um dicionário
@@ -141,8 +141,9 @@ def scrape_member_info(member_parameter):
     scraped_member_info['profile_link'] = profile_link
     scraped_member_info['num_friends'] = num_friends
     scraped_member_info['friends'] = friend_data
+    scraped_member_info['num_games'] = num_games
+    scraped_member_info['games'] = games_data
 
-    # print(scraped_member_info)
     return scraped_member_info
 
 
@@ -158,24 +159,28 @@ def scrape_member_info(member_parameter):
 
 def save_member_info_csv(member_info_parameter):
     with open('steam_members.csv', 'a', newline='') as csv_file:
-        fieldnames = ['Page', 'Username', 'Profile Link', 'Number of Friends', 'Friends']
+        fieldnames = ['Page', 'Username', 'Profile Link', 'Number of Friends', 'Friends', 'Number of Games', 'Games']
         csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         csv_writer.writerow({'Page': page_number, 'Username': member_info_parameter['username'],
                              'Profile Link': member_info_parameter['profile_link'],
                              'Number of Friends': member_info_parameter['num_friends'],
-                             'Friends': member_info_parameter['friends']})
+                             'Friends': member_info_parameter['friends'],
+                             'Number of Games': member_info_parameter['num_games'],
+                             'Games': member_info_parameter['games']})
 
 
 def save_member_info_csv_without_usernames(member_info_parameter):
     with open('steam_members.csv', 'a', newline='') as csv_file:
-        fieldnames = ['Page', 'Id', 'Number of Friends', 'Friends']
+        fieldnames = ['Page', 'Id', 'Number of Friends', 'Friends', 'Number of Games', 'Games']
         csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         csv_writer.writerow({'Page': page_number,
                              'Id': member_info_parameter['id'],
                              'Number of Friends': member_info_parameter['num_friends'],
                              # 'Friends': str(member_info_parameter['friends']).replace("[", "").replace("]", "").replace(
                              #     "'", "")})
-                             'Friends': member_info_parameter['friends']})
+                             'Friends': member_info_parameter['friends'],
+                             'Number of Games': member_info_parameter['num_games'],
+                             'Games': member_info_parameter['games']})
 
 
 # Chame a função para fazer login no Steam

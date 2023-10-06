@@ -11,7 +11,7 @@ import chromedriver_autoinstaller
 
 chromedriver_autoinstaller.install()
 chrome_options = Options()
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 chrome_options.add_argument("--window-size=1920x1080")
 driver = webdriver.Chrome(options=chrome_options)
 
@@ -100,7 +100,7 @@ def scrap_games_data(profile_link):
         user_games_url = profile_link + '/games/?tab=all'
 
         driver.get(user_games_url)
-        time.sleep(10)  # Esperar a página dos jogos carregar
+        time.sleep(20)  # Esperar a página dos jogos carregar
 
         games_list_div = driver.find_element(By.CLASS_NAME, "gameslistitems_List_3tY9v")
 
@@ -115,10 +115,11 @@ def scrap_games_data(profile_link):
             game_url = game_element.find_element(By.CLASS_NAME, "gameslistitems_GameItemPortrait_1bAC6").get_attribute(
                 "href")
             game_id = game_url.split('/')[-1]
-            game_name = game_element.find_element(By.CLASS_NAME, "gameslistitems_GameNameContainer_w6q9p").text
+            # game_name = game_element.find_element(By.CLASS_NAME, "gameslistitems_GameNameContainer_w6q9p").text
             hours_played_element = game_element.find_element(By.CLASS_NAME, "gameslistitems_Hours_26nl3").text
             playtime = hours_played_element.split('\n')[-1].split(' ')[0]
-            game_data.append((game_id, game_name, playtime))
+            # game_data.append((game_id, game_name, playtime))
+            game_data.append((game_id, playtime))
     except Exception as exc:
         print('An exception occurred when retrieving friend data.', exc)
     return game_data, num_games
@@ -187,7 +188,7 @@ def save_member_info_csv_without_usernames(member_info_parameter):
 login_to_steam()
 
 # Número da página atual
-page_number = 2
+page_number = 1
 
 # # Após fazer login, obtenha os cookies
 # cookies = driver.get_cookies()

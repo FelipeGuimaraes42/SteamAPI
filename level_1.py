@@ -25,11 +25,16 @@ level_1 = level_0
 root_friends_list = level_0.iloc[0].friendsList
 
 # Adding Friends of root -> level 1
+#for i in range(len(root_friends_list)):
 for i in range(2):
-    print(i)
     user, user_id = getUserDataAndId(steam, root_friends_list[i]["steamid"])
     level_1 = addNewRow(level_1, user, user_id)
-    level_1 = getFriendsList(level_1, user_id, privateIdsList, API_KEY)
+    # Get friends
+    api_url = f'http://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key={API_KEY}&steamid={user_id}&relationship=friend&format=json'
+    json_data = makeRequest(api_url)
+    index = level_1.index.tolist()[-1]
+    level_1.loc[index, 'friendsList'] = str(json_data['friendslist']['friends'])
+    # TODO: Get games - still not working
     level_1 = getGamesData(steam, level_1, user_id)
 
 # Save results

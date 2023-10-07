@@ -1,7 +1,6 @@
 import pandas as pd
 import ast
 
-from utils.api import getFriendsList, getGamesData
 from utils.private_ids import savePrivateIds
 
 

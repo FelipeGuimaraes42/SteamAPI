@@ -23,7 +23,6 @@ def createDataframeFromRoot(steam, steamid):
     df.set_index("steamid", inplace=True)
     new_columns = [
         "friendsList",
-        "ownedGamesCount",
         "ownedGamesList",
     ]
     for col_name in new_columns:
@@ -50,11 +49,9 @@ def getGamesData(steam, df, user_id):
         row = df.shape[0] - 1
         owned_games = steam.users.get_owned_games(user_id)
         if len(owned_games["games"]) == 0:
-            df["ownedGamesCount"][row] = 0
             df["ownedGamesList"][row] = np.nan
             return df
 
-        df["ownedGamesCount"][row] = len(owned_games["games"])
         df["ownedGamesList"][row] = owned_games["games"]
         return df
 

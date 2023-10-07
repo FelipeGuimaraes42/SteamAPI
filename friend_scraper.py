@@ -13,7 +13,7 @@ import chromedriver_autoinstaller
 
 chromedriver_autoinstaller.install()
 chrome_options = Options()
-# chrome_options.add_argument("--headless")
+chrome_options.add_argument("--headless")
 chrome_options.add_argument("--window-size=1920x1080")
 driver = webdriver.Chrome(options=chrome_options)
 

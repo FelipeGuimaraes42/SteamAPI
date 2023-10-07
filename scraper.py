@@ -61,7 +61,7 @@ def create_csv_file():
 def create_csv_file_without_usernames():
     if not os.path.exists('steam_members.csv'):
         with open('steam_members.csv', 'w', newline='') as csv_file:
-            fieldnames = ['Page', 'Id', 'Number of Friends', 'Friends', 'Friends', 'Number of Games', 'Games']
+            fieldnames = ['Page', 'Id', 'Number of Friends', 'Friends', 'Number of Games', 'Games']
             csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
             csv_writer.writeheader()
 

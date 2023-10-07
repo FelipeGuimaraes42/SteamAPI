@@ -163,7 +163,6 @@ for user in data:
     id_value, friends_value = user  # Unpack the tuple
     friends_value = ast.literal_eval(friends_value)
     for friend in friends_value:
-        # print(f"Id: {id_value}, Friend: {friend}")
         user_info = scrape_user_info(friend)
         save_user_info_csv(id_value, user_info)
 

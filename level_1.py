@@ -25,21 +25,38 @@ level_1 = level_0
 root_friends_list = level_0.iloc[0].friendsList
 
 # Adding Friends of root -> level 1
-#for i in range(len(root_friends_list)):
-for i in range(2):
+for i in range(len(root_friends_list)):
     user, user_id = getUserDataAndId(steam, root_friends_list[i]["steamid"])
+    print('Getting data of i-th friend:', i,'whose steamid =', user_id)
     level_1 = addNewRow(level_1, user, user_id)
+
     # Get friends
     api_url = f'http://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key={API_KEY}&steamid={user_id}&relationship=friend&format=json'
     json_data = makeRequest(api_url)
-    index = level_1.index.tolist()[-1]
-    level_1.loc[index, 'friendsList'] = str(json_data['friendslist']['friends'])
-    # TODO: Get games - still not working
-    level_1 = getGamesData(steam, level_1, user_id)
+
+    if (user_id not in privateIdsList):
+        try:
+            level_1.loc[user_id, 'friendsCount'] = len(json_data['friendslist']['friends'])
+            level_1.loc[user_id, 'friendsList'] = str(json_data['friendslist']['friends'])
+
+        except:
+            if(user_id not in privateIdsList):
+                print('New private user found. Adding steamid = ',user_id,'to privateIdsList')
+                privateIdsList.append(user_id)
+            level_1.loc[user_id, 'friendsCount'] = np.nan
+            level_1.loc[user_id, 'friendsList'] = np.nan
+
+        # Get games
+        json_data = steam.users.get_owned_games(user_id)
+        try:
+            level_1.loc[user_id, 'ownedGamesCount'] = len(json_data.get('games'))
+            level_1.loc[user_id, 'ownedGamesList'] = str(json_data.get('games'))
+        except:
+            level_1.loc[user_id, 'ownedGamesCount'] = 0
+            level_1.loc[user_id, 'ownedGamesList'] = np.nan
+    else:
+        print('steamid = ',user_id,'is private. Skipping...')
 
 # Save results
-resultFile = 'level_1.csv'
-savePrivateIds(privateIdsList)
-level_1.to_csv(resultFile ,index=True)
-print('Root dataframe saved to', resultFile)
+saveData(level_1, 'level_1.csv', privateIdsList)
     

@@ -7,6 +7,9 @@ import time
 import csv
 import os
 
+import warnings
+warnings.filterwarnings("ignore")
+
 import chromedriver_autoinstaller
 
 chromedriver_autoinstaller.install()
@@ -188,7 +191,7 @@ def save_member_info_csv_without_usernames(member_info_parameter):
 login_to_steam()
 
 # Número da página atual
-page_number = 1
+page_number = 78
 
 # # Após fazer login, obtenha os cookies
 # cookies = driver.get_cookies()

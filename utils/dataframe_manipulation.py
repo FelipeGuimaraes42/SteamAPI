@@ -25,7 +25,9 @@ def prepareImportedDataframe(df):
 
 
 def saveData(df, dfName, privateIdsList):
-    resultFile = dfName
     savePrivateIds(privateIdsList)
-    df.to_csv(resultFile, index=True)
-    print("Dataframe saved to", resultFile)
+    df.to_csv(f"temp_{dfName}", index=True)
+    print(f"Data saved as a temporary file: 'temp_{dfName}'")
+    print(
+        "If you'd like to version it, all you have to do is remove 'temp_' from its name."
+    )

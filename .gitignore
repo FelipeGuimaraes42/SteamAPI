@@ -3,3 +3,6 @@
 **/.idea/*
 **/.csv
 __pycache__
+# Add temporary files you want to ignore in the dump folder.
+dump/*
+temp*

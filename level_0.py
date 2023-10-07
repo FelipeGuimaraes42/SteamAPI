@@ -18,8 +18,8 @@ privateIdsList = getPrivateIdsList() # List has steamid's of users that we canno
 
 # Get one of the users in the top of the steam friends ladder in https://steamladder.com/ladder/friends/
 root_df, root_user, root_user_id = createDataframeFromRoot(steam, "76561198070799736")
-root_df = getFriendsList(root_df, root_user_id, privateIdsList, API_KEY)
-root_df = getGamesData(steam, root_df, root_user_id)
+root_df = getRootFriendsList(root_df, root_user_id, privateIdsList, API_KEY)
+root_df = getRootGamesData(steam, root_df, root_user_id)
 
 # Save results
 saveData(root_df, 'level_0.csv', privateIdsList)

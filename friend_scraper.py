@@ -69,6 +69,19 @@ def extract_csv_info():
     return id_and_friends
 
 
+def verify_user(url):
+    driver.get(url)
+    try:
+        div_element = driver.find_element(By.XPATH, "//div[@id='mainContents']//h2")
+
+        if div_element:
+            return False
+        else:
+            return True
+    except Exception as e:
+        return True
+
+
 def scrap_friends_data(profile_link):
     friend_data = []
     num_friends = 0
@@ -130,29 +143,33 @@ def scrape_user_info(user_id):
     scraped_user_info = {}
     profile_link = "https://steamcommunity.com/id/" + user_id
 
-    friend_data, num_friends = scrap_friends_data(profile_link)
-    games_data, num_games = scrap_games_data(profile_link)
+    user_exists = verify_user(profile_link)
 
-    # Armazenar informações do membro em um dicionário
-    scraped_user_info['id'] = user_id
-    scraped_user_info['num_friends'] = num_friends
-    scraped_user_info['friends'] = friend_data
-    scraped_user_info['num_games'] = num_games
-    scraped_user_info['games'] = games_data
+    if user_exists:
+        friend_data, num_friends = scrap_friends_data(profile_link)
+        games_data, num_games = scrap_games_data(profile_link)
+
+        # Armazenar informações do membro em um dicionário
+        scraped_user_info['id'] = user_id
+        scraped_user_info['num_friends'] = num_friends
+        scraped_user_info['friends'] = friend_data
+        scraped_user_info['num_games'] = num_games
+        scraped_user_info['games'] = games_data
 
     return scraped_user_info
 
 
 def save_user_info_csv(friend_id, user_info_parameter):
-    with open('friends_first_level.csv', 'a', newline='') as csv_file:
-        fieldnames = ['Friend Id', 'Id', 'Number of Friends', 'Friends', 'Number of Games', 'Games']
-        csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-        csv_writer.writerow({'Friend Id': friend_id,
-                             'Id': user_info_parameter['id'],
-                             'Number of Friends': user_info_parameter['num_friends'],
-                             'Friends': user_info_parameter['friends'],
-                             'Number of Games': user_info_parameter['num_games'],
-                             'Games': user_info_parameter['games']})
+    if len(user_info_parameter) != 0:
+        with open('friends_first_level.csv', 'a', newline='') as csv_file:
+            fieldnames = ['Friend Id', 'Id', 'Number of Friends', 'Friends', 'Number of Games', 'Games']
+            csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            csv_writer.writerow({'Friend Id': friend_id,
+                                 'Id': user_info_parameter['id'],
+                                 'Number of Friends': user_info_parameter['num_friends'],
+                                 'Friends': user_info_parameter['friends'],
+                                 'Number of Games': user_info_parameter['num_games'],
+                                 'Games': user_info_parameter['games']})
 
 
 login_to_steam()

@@ -13,16 +13,16 @@ steam = Steam(API_KEY)
 
 privateIdsList = getPrivateIdsList() # List has steamid's of users that we cannot get friends lists from.
 
-scaped_df = pd.read_csv('databases/scraped_data.csv')
-scaped_df.drop(columns=['Unnamed: 0'], inplace=True)
+scraped_df = pd.read_csv('databases/scraped_data.csv')
+scraped_df.drop(columns=['Unnamed: 0'], inplace=True)
 
 root_df = pd.read_csv('databases/api_level_0.csv')
 root_df.set_index("steamid", inplace=True)
 
-#for i in range(len(scaped_df)):
-for i in range(10):
+for i in range(len(scraped_df)):
+#for i in range(5):
     try:
-        user, user_id = getUserDataFromId(steam, scaped_df.loc[i,'Id'])
+        user, user_id = getUserDataFromId(steam, scraped_df.loc[i,'Id'])
 
         if (user_id not in privateIdsList):
             print('Getting data of i-th root user:', i, 'whose steamid =', user_id)

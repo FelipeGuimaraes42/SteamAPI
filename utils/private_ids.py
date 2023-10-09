@@ -22,6 +22,7 @@ def savePrivateIds(privateIdsList):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+
 def incrementPrivateIds(privateIdsList, user_id):
     if (user_id not in privateIdsList):
         print('New private user found. Adding steamid = ',user_id,'to privateIdsList')

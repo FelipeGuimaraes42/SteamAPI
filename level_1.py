@@ -27,14 +27,14 @@ root_friends_list = level_0.iloc[0].friendsList
 # Adding Friends of root -> level 1
 for i in range(len(root_friends_list)):
     user, user_id = getUserDataAndId(steam, root_friends_list[i]["steamid"])
-    print('Getting data of i-th friend:', i,'whose steamid =', user_id)
-    level_1 = addNewRow(level_1, user, user_id)
-
-    # Get friends
-    api_url = f'http://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key={API_KEY}&steamid={user_id}&relationship=friend&format=json'
-    json_data = makeRequest(api_url)
 
     if (user_id not in privateIdsList):
+        print('Getting data of i-th friend:', i,'whose steamid =', user_id)
+        level_1 = addNewRow(level_1, user, user_id)
+        
+        # Get friends
+        api_url = f'http://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key={API_KEY}&steamid={user_id}&relationship=friend&format=json'
+        json_data = makeRequest(api_url)
         try:
             level_1.loc[user_id, 'friendsCount'] = len(json_data['friendslist']['friends'])
             level_1.loc[user_id, 'friendsList'] = str(json_data['friendslist']['friends'])

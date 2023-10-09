@@ -33,17 +33,30 @@ def getUserDataAndId(steam, steamid):
     return user, steam_id
 
 
+def getUserDataFromId(steam, id):
+    try:
+        if id.isnumeric():
+            user = steam.users.get_user_details(id)
+        else:
+            user = steam.users.search_user(id)
+    except:
+        print("Could not get data from user with ID:", id)
+        return
+    steam_id = user["player"]["steamid"]
+    return user, steam_id
+
+
 def getRootFriendsList(df, user_id, privateIdsList, API_KEY):
     row = df.shape[0] - 1
     try:
-        api_url = f'http://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key={API_KEY}&steamid={user_id}&relationship=friend&format=json'
+        api_url = f"http://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key={API_KEY}&steamid={user_id}&relationship=friend&format=json"
         json_data = makeRequest(api_url)
-        df['friendsCount'][row] = len(json_data['friendslist']['friends'])
-        df['friendsList'][row] = json_data['friendslist']['friends']
+        df["friendsCount"][row] = len(json_data["friendslist"]["friends"])
+        df["friendsList"][row] = json_data["friendslist"]["friends"]
         return df
     except Exception as e:
         privateIdsList.append(df.index[row])
-        df['friendsList'][row] = np.nan
+        df["friendsList"][row] = np.nan
         return df
 
 
@@ -52,11 +65,11 @@ def getRootGamesData(steam, df, user_id):
         row = df.shape[0] - 1
         owned_games = steam.users.get_owned_games(user_id)
         if len(owned_games["games"]) == 0:
-            df['ownedGamesCount'][row] = 0
+            df["ownedGamesCount"][row] = 0
             df["ownedGamesList"][row] = np.nan
             return df
 
-        df['ownedGamesCount'][row] = len(owned_games["games"])
+        df["ownedGamesCount"][row] = len(owned_games["games"])
         df["ownedGamesList"][row] = owned_games["games"]
         return df
 

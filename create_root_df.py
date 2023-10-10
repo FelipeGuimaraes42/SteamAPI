@@ -19,7 +19,9 @@ scraped_df.drop(columns=['Unnamed: 0'], inplace=True)
 root_df = pd.read_csv('databases/api_level_0.csv')
 root_df.set_index("steamid", inplace=True)
 
-for i in range(len(scraped_df)):
+start = 0
+
+for i in range(start, len(scraped_df)):
 #for i in range(5):
     try:
         user, user_id = getUserDataFromId(steam, scraped_df.loc[i,'Id'])

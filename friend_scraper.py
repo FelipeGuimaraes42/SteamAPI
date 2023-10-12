@@ -8,7 +8,6 @@ import csv
 import os
 import ast
 
-
 import chromedriver_autoinstaller
 
 chromedriver_autoinstaller.install()
@@ -64,14 +63,29 @@ def extract_csv_info():
 
         for row in reader:
             # Extract data based on headers and append as a tuple
-            id_and_friends.append((row['Id'], row['Friends']))
+            id_and_friends.append((row['Number of Friends'], (row['Id'], row['Friends'])))
+    # return [(num, valor) for num, valor in sorted_number_of_friends if num not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13")]
+    return sorted(id_and_friends, key=lambda x: int(x[0]))
 
-    return id_and_friends
+
+def extract_csv_info_friends():
+    # Initialize an empty list to store data as tuples
+    friends_ids = []
+
+    # Open and read the CSV file
+    with open("friends_first_level_pt1.csv", mode='r', newline='') as file:
+        reader = csv.DictReader(file)
+
+        for row in reader:
+            # Extract data based on headers and append as a tuple
+            friends_ids.append(row['Id'])
+
+    return friends_ids
 
 
 def verify_user(url):
-    driver.get(url)
     try:
+        driver.get(url)
         div_element = driver.find_element(By.XPATH, "//div[@id='mainContents']//h2")
 
         if div_element:
@@ -161,7 +175,7 @@ def scrape_user_info(user_id):
 
 def save_user_info_csv(friend_id, user_info_parameter):
     if len(user_info_parameter) != 0:
-        with open('friends_first_level.csv', 'a', newline='') as csv_file:
+        with open('friends_first_level_felipe_pt2.csv', 'a', newline='') as csv_file:
             fieldnames = ['Friend Id', 'Id', 'Number of Friends', 'Friends', 'Number of Games', 'Games']
             csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
             csv_writer.writerow({'Friend Id': friend_id,
@@ -175,13 +189,18 @@ def save_user_info_csv(friend_id, user_info_parameter):
 login_to_steam()
 create_csv_file()
 data = extract_csv_info()
+scraped_ids = [user_info[1][0] for user_info in data]
+scraped_ids.append(extract_csv_info_friends())
 
 for user in data:
-    id_value, friends_value = user  # Unpack the tuple
+    num_friends, user_tuple = user  # Unpack the tuple
+    id_value, friends_value = user_tuple  # Unpack the tuple
     friends_value = ast.literal_eval(friends_value)
     for friend in friends_value:
-        user_info = scrape_user_info(friend)
-        save_user_info_csv(id_value, user_info)
+        if friend not in scraped_ids:
+            user_info = scrape_user_info(friend)
+            save_user_info_csv(id_value, user_info)
+            scraped_ids.append(friend)
 
 # Fechar o navegador
 driver.quit()

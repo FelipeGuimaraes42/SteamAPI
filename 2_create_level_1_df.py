@@ -31,6 +31,7 @@ root_df['friendsList'] = friends
 
 # Database must be stored as temp because we cannot version files larger than 100mb in github.
 level_1 = pd.read_csv('databases/temp_api_level_1.csv')
+level_1.set_index("steamid", inplace=True)
 output_name = 'temp_level_1.csv'
 backup_name = 'temp_level_1_backup.csv'
 
@@ -64,7 +65,7 @@ for i in range(start, len(root_df)):
 
                 except:
                     if(user_id not in privateIdsList):
-                        print('New private user found. Adding steamid = ', user_id, 'to privateIdsList')
+                        # print('New private user found. Adding steamid = ', user_id, 'to privateIdsList')
                         privateIdsList.append(user_id)
                         savePrivateIds(privateIdsList)
                     level_1.loc[user_id, 'friendsCount'] = np.nan
@@ -83,16 +84,20 @@ for i in range(start, len(root_df)):
                 operationCount += 1
                 # Save an immediate backup for the sake of visibility.
                 if (operationCount == 1):
-                    level_1 = dropUnnecessaryColumns(level_1)
+                    dropUnnecessaryColumns(level_1)
                     level_1.to_csv(output_name, index=True)
-                # Save a backup every 10 operations.
-                if (operationCount) % 10 == 0:
-                    level_1 = dropUnnecessaryColumns(level_1)
-                    level_1.to_csv(output_name, index=True)
+                # Save a backup every 25 operations.
+                if (operationCount) % 25 == 0:
+                    print('Total number of operations ==', operationCount,'. Saving backup.')
+                    savePrivateIds(privateIdsList)
+                    dropUnnecessaryColumns(level_1)
+                    level_1.to_csv(backup_name, index=True)
             else:
-                print('steamid = ', user_id, 'is private. Skipping...')
+                # print('steamid = ', user_id, 'is private. Skipping...')
+                continue
         except:
-            level_1 = dropUnnecessaryColumns(level_1)
+            savePrivateIds(privateIdsList)
+            dropUnnecessaryColumns(level_1)
             level_1.to_csv(output_name, index=True)
 
 # Save results

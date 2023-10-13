@@ -51,7 +51,6 @@ def dropUnnecessaryColumns(df):
         "gameserversteamid",
     ]
     df.drop(columns=columns_to_drop, inplace=True, errors="ignore")
-    return df
 
 
 def treatIncompleteDictionary(dict_as_string):
@@ -64,7 +63,7 @@ def treatIncompleteDictionary(dict_as_string):
 
 def saveData(df, dfName, privateIdsList):
     savePrivateIds(privateIdsList)
-    df.to_csv(f"temp_{dfName}", index=True)
+    df.to_csv(f"temp_{dfName}", index=False)
 
     print(f"Data saved as a temporary file: 'temp_{dfName}'")
     print(

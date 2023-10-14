@@ -30,12 +30,12 @@ root_df['friendsList'] = friends
 # ----------------------------------------------------------------------------------
 
 # Database must be stored as temp because we cannot version files larger than 100mb in github.
-level_1 = pd.read_csv('databases/temp_api_level_1.csv')
+level_1 = pd.read_csv('databases/temp_api_level_1_ate_207.csv')
 level_1.set_index("steamid", inplace=True)
 output_name = 'temp_level_1.csv'
 backup_name = 'temp_level_1_backup.csv'
 
-start = 151
+start = 207
 
 operationCount = 0
 

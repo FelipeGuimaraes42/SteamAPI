@@ -1,0 +1,1 @@
+Getting data of j-th friend: 11 whose steamid = 76561198013914403 from the list of friends of the i-th root user: 28 whose steamid =  76561197973009400

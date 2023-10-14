@@ -23,9 +23,10 @@ def prepareImportedDataframe(df):
 
     return df
 
+
 def prepareRootDataframe(root_df):
     # Drop rows that have no value set for friendsList.
-    mask = root_df['friendsList'].apply(lambda x: not isinstance(x, str))
+    mask = root_df["friendsList"].apply(lambda x: not isinstance(x, str))
     root_df = root_df[~mask]
 
     root_df.drop_duplicates(inplace=True)
@@ -34,17 +35,35 @@ def prepareRootDataframe(root_df):
 
     return root_df
 
+
+def dropUnnecessaryColumns(df):
+    columns_to_drop = [
+        "avatar",
+        "avatarfull",
+        "avatarhash",
+        "avatarmedium",
+        "personaname",
+        "realname",
+        "gameextrainfo",
+        "gameid",
+        "lobbysteamid",
+        "gameserverip",
+        "gameserversteamid",
+    ]
+    df.drop(columns=columns_to_drop, inplace=True, errors="ignore")
+
+
 def treatIncompleteDictionary(dict_as_string):
-    last_occurrence = dict_as_string.rfind('},')
-    modified_dict = dict_as_string[:last_occurrence + 2]
-    modified_dict = modified_dict[:-2] + '}]'
+    last_occurrence = dict_as_string.rfind("},")
+    modified_dict = dict_as_string[: last_occurrence + 2]
+    modified_dict = modified_dict[:-2] + "}]"
 
     return modified_dict
 
 
 def saveData(df, dfName, privateIdsList):
     savePrivateIds(privateIdsList)
-    df.to_csv(f"temp_{dfName}", index=True)
+    df.to_csv(f"temp_{dfName}", index=False)
 
     print(f"Data saved as a temporary file: 'temp_{dfName}'")
     print(

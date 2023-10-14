@@ -18,13 +18,5 @@ def savePrivateIds(privateIdsList):
         with open(output_file, "w") as file:
             for user_id in privateIdsList:
                 file.write(user_id + "\n")  # Add a newline character after each user ID
-        print(f"User IDs saved to {output_file}")
     except Exception as e:
-        print(f"An error occurred: {e}")
-
-
-def incrementPrivateIds(privateIdsList, user_id):
-    if (user_id not in privateIdsList):
-        print('New private user found. Adding steamid = ',user_id,'to privateIdsList')
-        privateIdsList.append(user_id)
-        savePrivateIds(privateIdsList)
+        print(f"Error when saving private ids: {e}")

@@ -49,6 +49,9 @@ def dropUnnecessaryColumns(df):
         "lobbysteamid",
         "gameserverip",
         "gameserversteamid",
+        "profilestate",
+        "personastateflags",
+        "primaryclanid",
     ]
     df.drop(columns=columns_to_drop, inplace=True, errors="ignore")
 

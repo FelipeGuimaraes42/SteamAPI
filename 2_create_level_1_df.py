@@ -35,7 +35,7 @@ level_1.set_index("steamid", inplace=True)
 output_name = 'temp_level_1.csv'
 backup_name = 'temp_level_1_backup.csv'
 
-start = 39
+start = 151
 
 operationCount = 0
 
@@ -86,8 +86,8 @@ for i in range(start, len(root_df)):
                 if (operationCount == 1):
                     dropUnnecessaryColumns(level_1)
                     level_1.to_csv(output_name, index=True)
-                # Save a backup every 25 operations.
-                if (operationCount) % 25 == 0:
+                # Save a backup every 100 operations.
+                if (operationCount) % 100 == 0:
                     print('Total number of operations ==', operationCount,'. Saving backup.')
                     savePrivateIds(privateIdsList)
                     dropUnnecessaryColumns(level_1)

@@ -33,14 +33,17 @@ root_df['friendsList'] = friends
 
 # Database must be stored as temp because we cannot version files larger than 100mb in github.
 start = 444
+# Iterate only the first 500 rows. Otherwise the dataframe will be too large. 
+end = 500
 
 level_1 = pd.read_parquet(f'databases/temp_api_level_1_ate_{start}.parquet')
-output_name = 'temp_level_1'
-backup_name = 'temp_level_1_backup'
+output_name = f'temp_api_level_1_ate_{end}'
+backup_name = f'temp_api_level_1_ate_{end}_backup'
 
 operationCount = 0
 
-for i in range(start, len(root_df)):
+# Iterate only the first 500 rows. Otherwise the dataframe will be too large. 
+for i in range(start, end):
     index = root_df.index[i]
     friendsList = root_df.iloc[i].friendsList
     

@@ -52,6 +52,8 @@ def dropUnnecessaryColumns(df):
         "profilestate",
         "personastateflags",
         "primaryclanid",
+        "communityvisibilitystate",
+        "commentpermission"
     ]
     df.drop(columns=columns_to_drop, inplace=True, errors="ignore")
 

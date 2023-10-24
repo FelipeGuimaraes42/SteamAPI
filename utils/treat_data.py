@@ -33,7 +33,8 @@ def treatAndSaveData(df, dfName):
     df.index = df.index.astype("int64")
     df.sort_index(ascending=True, inplace=True)
 
-    df.to_csv(f"{dfName}.csv", index=True)
+    # df.to_csv(f"{dfName}.csv", index=True)
     df.to_parquet(f"{dfName}.parquet", index=True)
+    print('Saved dataframe has', len(df), 'rows.')
 
     return df

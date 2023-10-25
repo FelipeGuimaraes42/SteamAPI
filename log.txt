@@ -5,3 +5,7 @@ Getting data of j-th friend: 118 whose steamid = 76561198131147872 from the list
 Getting data of j-th friend: 179 whose steamid = 76561198088012198 from the list of friends of the i-th root user: 285 whose steamid =  76561198031040400
 Getting data of j-th friend: 86 whose steamid = 76561198993898859 from the list of friends of the i-th root user: 339 whose steamid =  76561198040486200
 Getting data of j-th friend: 253 whose steamid = 76561198335433924 from the list of friends of the i-th root user: 444 whose steamid =  76561198054796700
+
+
+Getting games for i-th user, 7400 with steamid = 76561198017068023 . successfullOperationsCount = 1099
+Total number of successfull operations == 1100 . Saving backup.

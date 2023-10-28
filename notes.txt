@@ -1,0 +1,14 @@
+Thoughts:
+Tive um tempo para pensar e creio que não conseguimos um grafo com mais níveis pois, na coleta inicial:
+
+1. Não coletamos a lista completa de amigos de uma pessoa.
+2. Não começamos a partir de um root mas sim vários roots.
+3. Não coletamos usuários que não nos permitiam ver lista de amigos.
+
+Agora a próxima coleta vai levar isso tudo em consideração.
+
+E nosso método/condição para formar arestas creio ser a seguinte:
+- Se um usuário A tem um amigo B em sua lista de amigos && B está presente no índice do banco de dados, forme uma aresta.
+
+Isso vai formar aresta mesmo que B não tenha uma lista de amigos. Afinal, para eu dizer que sou seu amigo você precisa aceitar. 
+Logo apenas um lado ter a pessoa na lista de amigos já é suficiente.

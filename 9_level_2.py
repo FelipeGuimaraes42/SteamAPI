@@ -18,10 +18,9 @@ warnings.filterwarnings("ignore")
 API_KEY = config("STEAM_API_KEY")
 
 level_1 = pd.read_parquet('databases/temp_level_1.parquet')
-level_1.rename_axis('steamid', inplace=True)
-df = pd.read_parquet('databases/temp_backup_level_2_start_at_0.parquet')
+df = pd.read_parquet('databases/temp_backup_level_2_start_at_1597.parquet')
 
-start = 25
+start = 1902
 end_of_level_1 = len(level_1)
 output_name = f'temp_level_2_start_at_{start}'
 backup_name = f'temp_backup_level_2_start_at_{start}'
@@ -66,11 +65,9 @@ for i in range(start, end_of_level_1):
         try:
             user, user_id = getUserDataFromId(steam, friendsList[j]['steamid'])
 
-            logText = 'Getting data of j-th friend:', j, 'whose steamid =', user_id, 'from the list of friends of the i-th root user:', i, 'whose steamid = ', index, 'oppCount =', operationsCount, '. successCount = ', successfullOperationsCount
-
+            logText = f'\nGetting data of j-th friend: {j} whose steamid = {user_id} from the list of friends of the i-th root user: {i} whose steamid = {index}. oppCount = {operationsCount} . successCount = {successfullOperationsCount}'
             with open(log_file_path, 'a') as file:
                 file.write(logText)
-
             print(logText)
 
             new_row = pd.DataFrame(data=user).T
@@ -161,13 +158,19 @@ for i in range(start, end_of_level_1):
         if (successCheck == 3):
             successfullOperationsCount += 1
         # Save a backup periodically
-        if (operationsCount % 100 == 0):
-            print('Total number of operations ==', operationsCount,'. Saving backup.')
+        if (operationsCount % 200 == 0):
+            logText = f'\nTotal number of operations == {operationsCount} . Saving backup.'
+            print(logText)
+            with open(log_file_path, 'a') as file:
+                file.write(logText)
             df.drop_duplicates(inplace=True)
             df = saveData(df, backup_name)
             time.sleep(1)
     # Save data at the end of each i-th root user friendList.
-    print('\ni-th root user:', i, 'whose steamid = ', index, 'collection DONE.\n')
+    logText = f'\ni-th root user: {i} whose steamid = {index} collection DONE.'
+    print(logText)
+    with open(log_file_path, 'a') as file:
+        file.write(logText)
     df.drop_duplicates(inplace=True)
     df = saveData(df, output_name)
 

@@ -1,12 +1,12 @@
-# import gdown
+import gdown
 import pandas as pd
 import csv
 import ast
 
-# gdrive_url = "https://drive.google.com/uc?id=1c9fQOru5pIfbwLZ3-yaUlDX_yOHlMMfw"
+gdrive_url = "https://drive.google.com/uc?id=1c9fQOru5pIfbwLZ3-yaUlDX_yOHlMMfw"
 output_file_name = "steam_final_snowball.parquet"
 
-# gdown.download(gdrive_url, output_file_name, quiet=False)
+gdown.download(gdrive_url, output_file_name, quiet=False)
 df = pd.read_parquet(output_file_name)
 
 valid_users = df.index.tolist()

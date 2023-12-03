@@ -20,4 +20,4 @@ nx.draw(G, with_labels=False,  edge_color='black', node_color='blue')
 pos = nx.spring_layout(G)
 nx.draw(G, pos, with_labels=False, edge_color='black', node_color='blue')
 
-plt.savefig("grafo.png")
+plt.savefig("graph.png")
